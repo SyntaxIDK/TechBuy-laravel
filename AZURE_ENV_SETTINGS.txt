@@ -1,0 +1,33 @@
+# Azure App Service Application Settings
+# Copy these values to Azure Portal → App Service → Configuration → Application Settings
+#
+# ⚠️ SECURITY NOTE: Replace placeholder values with your actual Azure credentials
+# Never commit real credentials to version control!
+
+APP_NAME=TechBuy
+APP_ENV=production
+APP_KEY=[YOUR_GENERATED_APP_KEY]
+APP_DEBUG=false
+APP_URL=[YOUR_AZURE_APP_SERVICE_URL]
+
+# Database Settings
+DB_CONNECTION=pgsql
+DB_HOST=[YOUR_POSTGRESQL_HOST].postgres.database.azure.com
+DB_PORT=5432
+DB_DATABASE=techbuy_users
+DB_USERNAME=[YOUR_POSTGRESQL_USERNAME]
+DB_PASSWORD=[YOUR_POSTGRESQL_PASSWORD]
+
+# MongoDB Settings
+MONGODB_DSN=[YOUR_COSMOSDB_CONNECTION_STRING_FROM_AZURE_PORTAL]
+
+# Session & Cache
+SESSION_DRIVER=database
+CACHE_DRIVER=database
+QUEUE_CONNECTION=database
+
+# PHP Extensions (if needed)
+PHP_EXTENSIONS=pdo_pgsql,mongodb,zip,curl,gd,mbstring,xml
+
+# Laravel specific for App Service
+WEBSITE_DYNAMIC_CACHE=0

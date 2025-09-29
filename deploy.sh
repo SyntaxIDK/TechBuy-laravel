@@ -70,7 +70,7 @@ build_for_production() {
     php artisan config:clear
     php artisan route:clear
     php artisan view:clear
-    
+
     # Skip cache:clear for production environment to avoid Azure connection issues from local
     if grep -q "APP_ENV=local" .env; then
         php artisan cache:clear
