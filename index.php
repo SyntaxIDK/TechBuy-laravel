@@ -2,28 +2,57 @@
 
 /**
  * Laravel - A PHP Framework For Web Artisans
- *
- * This file serves as a fallback for Azure App Service
- * when the document root is not properly set to /public
+ * 
+ * This file serves as a bridge for Azure App Service
+ * while maintaining compatibility with local development
  */
 
-// Check if we're in the right directory
-if (file_exists(__DIR__ . '/public/index.php')) {
-    // Redirect to public folder
-    require_once __DIR__ . '/public/index.php';
-} else {
-    // Fallback error message
-    echo '<h1>TechBuy Laravel Application</h1>';
-    echo '<p>Application files are being loaded...</p>';
-    echo '<p>If you see this message, the application is deployed but the document root needs configuration.</p>';
+// Check if we're running on Azure App Service
+$isAzure = isset($_SERVER['WEBSITE_SITE_NAME']) || 
+           strpos($_SERVER['HTTP_HOST'] ?? '', 'azurewebsites.net') !== false ||
+           strpos($_SERVER['SERVER_SOFTWARE'] ?? '', 'Microsoft-IIS') !== false;
 
-    // Try to show some debug info
-    if (file_exists(__DIR__ . '/artisan')) {
-        echo '<p>✅ Laravel files detected</p>';
-    } else {
-        echo '<p>❌ Laravel files not found</p>';
+if ($isAzure) {
+    // Azure App Service: Load Laravel directly from root
+    define('LARAVEL_START', microtime(true));
+
+    // Check for maintenance mode
+    if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
+        require $maintenance;
     }
 
-    echo '<p>Current directory: ' . __DIR__ . '</p>';
-    echo '<p>Files in directory: ' . implode(', ', array_slice(scandir(__DIR__), 2, 10)) . '</p>';
+    // Load Composer autoloader
+    require __DIR__.'/vendor/autoload.php';
+
+    // Bootstrap Laravel application
+    $app = require_once __DIR__.'/bootstrap/app.php';
+
+    // Handle the request
+    $kernel = $app->make('Illuminate\Contracts\Http\Kernel');
+    $request = Illuminate\Http\Request::capture();
+    $response = $kernel->handle($request);
+    $response->send();
+    $kernel->terminate($request, $response);
+    
+} else {
+    // Local development: Use standard Laravel approach
+    // This should work with 'php artisan serve' or properly configured web server
+    if (php_sapi_name() === 'cli-server') {
+        // Built-in server - check if file exists in public
+        $publicFile = __DIR__ . '/public' . $_SERVER['REQUEST_URI'];
+        if (is_file($publicFile)) {
+            return false; // Let the built-in server serve the file
+        }
+        // Otherwise, serve through public/index.php
+        require_once __DIR__ . '/public/index.php';
+    } else {
+        // Web server - should be configured to use public folder as document root
+        echo '<h1>TechBuy Laravel Application</h1>';
+        echo '<p><strong>Local Development:</strong></p>';
+        echo '<p>Please use: <code>php artisan serve</code></p>';
+        echo '<p>Or configure your web server document root to point to the <code>/public</code> directory</p>';
+        echo '<hr>';
+        echo '<p>Current working directory: ' . __DIR__ . '</p>';
+        echo '<p>For production deployment, this will automatically work on Azure App Service.</p>';
+    }
 }

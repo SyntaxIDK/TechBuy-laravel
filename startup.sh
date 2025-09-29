@@ -14,24 +14,30 @@ if [ -f /home/site/wwwroot/.env.production ]; then
     echo "Environment file copied"
 fi
 
-# Clear and cache configurations
 cd /home/site/wwwroot
+
+# Note: The root index.php will handle Azure App Service routing automatically
+echo "TechBuy Laravel Application - Azure initialization starting..."
+cp -f /home/site/wwwroot/public/robots.txt /home/site/wwwroot/ 2>/dev/null || true
 
 # Install dependencies if needed
 if [ ! -d "vendor" ]; then
+    echo "Installing composer dependencies..."
     composer install --optimize-autoloader --no-dev
 fi
 
 # Laravel optimization commands
+echo "Optimizing Laravel..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
 # Run migrations and seeders
+echo "Running database migrations..."
 php artisan migrate --force
 php artisan db:seed --force
 
-echo "TechBuy Laravel application startup completed"
+echo "TechBuy Laravel application startup completed successfully!"
 
-# Start PHP-FPM (this is handled by Azure, but we ensure Laravel is ready)
-exec "$@"
+# Keep the process running (Azure handles PHP-FPM)
+tail -f /dev/null
