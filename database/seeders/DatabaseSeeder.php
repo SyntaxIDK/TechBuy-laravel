@@ -15,14 +15,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->withPersonalTeam()->create();
 
-        User::factory()->withPersonalTeam()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create test user only if it doesn't exist
+        if (!User::where('email', 'test@example.com')->exists()) {
+            User::factory()->withPersonalTeam()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
 
         $this->call([
             CategorySeeder::class,
             ProductSeeder::class,
+            AdminSeeder::class,
         ]);
     }
 }
