@@ -1,15 +1,31 @@
+# Laravel Root .htaccess
+# Works for both local development and Azure App Service
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
-
-    # Redirect everything to public folder if not already there
+    
+    # For local development: redirect to public folder
+    # For Azure: serve from root (handled by startup script)
+    
+    # Check if we're not already in public and file doesn't exist in root
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /public/$1 [L]
-
-    # If the request is for public folder, redirect to Laravel's public/index.php
-    RewriteCond %{REQUEST_URI} ^/public/
+    
+    # If public folder exists and we're in local dev, redirect to public
+    RewriteCond %{DOCUMENT_ROOT}/public/index.php -f
+    RewriteCond %{HTTP_HOST} !\.azurewebsites\.net$
+    RewriteRule ^(.*)$ /public/$1 [L,QSA]
+    
+    # Otherwise (Azure or root-based setup), use index.php in root
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^public/(.*)$ /public/index.php [L]
+    RewriteRule ^ index.php [L,QSA]
+    
+</IfModule>
+
+# Handle Authorization Header
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
