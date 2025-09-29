@@ -1,6 +1,6 @@
 # Azure App Service Application Settings
 # Copy these values to Azure Portal → App Service → Configuration → Application Settings
-# 
+#
 # ⚠️ SECURITY NOTE: Replace placeholder values with your actual Azure credentials
 # Never commit real credentials to version control!
 
@@ -23,7 +23,7 @@ MONGODB_DSN=[YOUR_COSMOSDB_CONNECTION_STRING_FROM_AZURE_PORTAL]
 
 # Session & Cache
 SESSION_DRIVER=database
-CACHE_DRIVER=database  
+CACHE_DRIVER=database
 QUEUE_CONNECTION=database
 
 # PHP Extensions (if needed)
