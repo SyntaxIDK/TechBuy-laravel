@@ -14,11 +14,20 @@ check_directory() {
     fi
 }
 
-# Function to backup current .env
+# Function to backup current .env (only if it's a local environment)
 backup_env() {
     if [ -f ".env" ]; then
-        cp .env .env.local.backup
-        echo "✅ Backed up current .env to .env.local.backup"
+        # Check if current .env is local (not production)
+        if grep -q "APP_ENV=local" .env || grep -q "DB_HOST=127.0.0.1" .env; then
+            cp .env .env.local.backup
+            echo "✅ Backed up local .env to .env.local.backup"
+        else
+            echo "⚠️  Current .env appears to be production - skipping backup"
+            if [ ! -f ".env.local.backup" ] && [ -f ".env.local.original" ]; then
+                cp .env.local.original .env.local.backup
+                echo "✅ Using .env.local.original as backup"
+            fi
+        fi
     fi
 }
 
@@ -38,8 +47,12 @@ restore_local_env() {
     if [ -f ".env.local.backup" ]; then
         cp .env.local.backup .env
         echo "✅ Restored local environment (.env.local.backup → .env)"
+    elif [ -f ".env.local.original" ]; then
+        cp .env.local.original .env
+        echo "✅ Restored local environment (.env.local.original → .env)"
     else
         echo "❌ Error: No local backup found!"
+        echo "💡 Try creating .env.local.original with your local settings"
         exit 1
     fi
 }
@@ -52,12 +65,18 @@ build_for_production() {
     echo "📦 Installing production dependencies..."
     composer install --optimize-autoloader --no-dev
 
-    # Clear and cache configs
+    # Clear and cache configs (skip cache:clear for production env to avoid DB connection issues)
     echo "🧹 Clearing and caching configurations..."
     php artisan config:clear
     php artisan route:clear
     php artisan view:clear
-    php artisan cache:clear
+    
+    # Skip cache:clear for production environment to avoid Azure connection issues from local
+    if grep -q "APP_ENV=local" .env; then
+        php artisan cache:clear
+    else
+        echo "⚠️  Skipping cache:clear for production environment (will be done on Azure)"
+    fi
 
     php artisan config:cache
     php artisan route:cache

@@ -203,7 +203,10 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            Product::create($product);
+            Product::firstOrCreate(
+                ['sku' => $product['sku']], // Search by SKU (unique identifier)
+                $product // Data to insert if not found
+            );
         }
     }
 }

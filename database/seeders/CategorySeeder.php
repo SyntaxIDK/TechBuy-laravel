@@ -47,7 +47,10 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            Category::create($category);
+            Category::firstOrCreate(
+                ['name' => $category['name']], // Search criteria
+                $category // Data to insert if not found
+            );
         }
     }
 }

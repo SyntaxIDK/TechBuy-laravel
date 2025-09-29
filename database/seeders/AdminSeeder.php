@@ -14,20 +14,26 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@techbuy.com',
-            'password' => Hash::make('password123'),
-            'role' => 'super_admin',
-            'email_verified_at' => now(),
-        ]);
+        Admin::firstOrCreate(
+            ['email' => 'admin@techbuy.com'],
+            [
+                'name' => 'Super Admin',
+                'email' => 'admin@techbuy.com',
+                'password' => Hash::make('password123'),
+                'role' => 'super_admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        Admin::create([
-            'name' => 'Admin User',
-            'email' => 'admin2@techbuy.com',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        Admin::firstOrCreate(
+            ['email' => 'admin2@techbuy.com'],
+            [
+                'name' => 'Admin User',
+                'email' => 'admin2@techbuy.com',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
